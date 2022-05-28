@@ -38,6 +38,8 @@ void modem_start_network();
  */
 void modem_stop_network();
 
+void wait_for_modem_signal();
+
 
 #ifdef __cplusplus
 }

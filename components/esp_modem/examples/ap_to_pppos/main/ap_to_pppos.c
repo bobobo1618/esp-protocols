@@ -7,6 +7,7 @@
    CONDITIONS OF ANY KIND, either express or implied.
 */
 #include <string.h>
+#include "driver/gpio.h"
 #include "esp_system.h"
 #include "esp_wifi.h"
 #include "esp_event.h"
@@ -134,6 +135,16 @@ void app_main(void)
     }
     ESP_ERROR_CHECK(ret);
 
+    gpio_config_t modem_gpio;
+    modem_gpio.intr_type = GPIO_INTR_DISABLE;
+    modem_gpio.mode = GPIO_MODE_OUTPUT;
+    modem_gpio.pin_bit_mask = (1 << 27) | (1 << 12);
+    modem_gpio.pull_down_en = GPIO_PULLDOWN_DISABLE;
+    modem_gpio.pull_up_en = GPIO_PULLUP_DISABLE;
+    gpio_config(&modem_gpio);
+    gpio_set_level(GPIO_NUM_27, 1);
+    gpio_set_level(GPIO_NUM_12, 1);
+
     // Initialize esp_netif and default event loop
     ESP_ERROR_CHECK(esp_netif_init());
     ESP_ERROR_CHECK(esp_event_loop_create_default());
@@ -149,6 +160,7 @@ void app_main(void)
     ESP_ERROR_CHECK(esp_event_handler_register(IP_EVENT, ESP_EVENT_ANY_ID, on_ip_event, NULL));
 
     // Start the PPP network and wait for connection
+    wait_for_modem_signal();
     modem_start_network();
     EventBits_t bits;
     do {
